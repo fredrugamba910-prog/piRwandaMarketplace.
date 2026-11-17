@@ -1,44 +1,467 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PiRwandaMarketplace</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #f5f5f5;
-      color: #333;
-    }
-    header {
-      background: #5b3c9d;
-      color: white;
-      padding: 25px;
-      text-align: center;
-    }
-    main {
-      padding: 25px;
-      text-align: center;
-    }
-    button {
-      background: #f5b800;
-      border: none;
-      padding: 12px 24px;
-      border-radius: 8px;
-      font-weight: bold;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#5b3c9d">
+<title>PiRwandaMarketplace</title>
+<style>
+:root {
+  --purple:#5b3c9d;
+  --gold:#f5b800;
+  --bg:#f5f5f8;
+  --white:#fff;
+}
+* { box-sizing:border-box; }
+body {
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:var(--bg);
+  color:#292735;
+}
+header {
+  background:var(--purple);
+  color:white;
+  padding:22px 16px;
+  text-align:center;
+}
+header h1 { margin:0 0 8px; }
+nav {
+  background:white;
+  padding:12px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  flex-wrap:wrap;
+  box-shadow:0 2px 6px #0001;
+}
+nav select { max-width:150px; }
+.container {
+  width:min(1050px,94%);
+  margin:22px auto;
+}
+.hero {
+  background:white;
+  border-radius:14px;
+  padding:25px 18px;
+  text-align:center;
+}
+input,select,textarea {
+  width:100%;
+  padding:12px;
+  border:1px solid #ddd;
+  border-radius:8px;
+  font-size:15px;
+  margin:6px 0 12px;
+}
+button {
+  border:0;
+  border-radius:8px;
+  padding:12px 17px;
+  cursor:pointer;
+  font-weight:bold;
+  background:var(--gold);
+  color:#292735;
+}
+button:hover { opacity:.88; }
+.primary { background:var(--purple); color:white; }
+.search { max-width:600px; }
+.section {
+  background:white;
+  padding:20px;
+  margin-top:20px;
+  border-radius:14px;
+}
+.products {
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(210px,1fr));
+  gap:16px;
+}
+.product {
+  border:1px solid #eee;
+  border-radius:12px;
+  overflow:hidden;
+  background:white;
+}
+.product img {
+  width:100%;
+  height:165px;
+  object-fit:cover;
+  background:#eee;
+}
+.product-info { padding:13px; }
+.price { color:var(--purple); font-weight:bold; }
+.actions {
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+}
+.actions button { flex:1; }
+.hidden { display:none; }
+footer {
+  margin-top:35px;
+  padding:25px;
+  background:var(--purple);
+  color:white;
+  text-align:center;
+}
+small { color:#777; }
+@media(max-width:500px) {
+  header h1 { font-size:23px; }
+  .section { padding:15px; }
+}
+</style>
 </head>
 <body>
-  <header>
-    <h1>PiRwandaMarketplace</h1>
-    <p>Pi-powered marketplace connecting buyers and sellers in Rwanda.</p>
-  </header>
-  <main>
-    <h2>Welcome to PiRwandaMarketplace</h2>
-    <p>Buy and sell products using Pi Network.</p>
-    <button>Explore Products</button>
-  </main>
+
+<header>
+  <h1>PiRwandaMarketplace</h1>
+  <p id="tagline">Buy and sell products in Rwanda using Pi Network</p>
+</header>
+
+<nav>
+  <strong>🟣 Pi Rwanda</strong>
+  <select id="language" onchange="changeLanguage()">
+    <option value="en">English</option>
+    <option value="rw">Ikinyarwanda</option>
+    <option value="sw">Kiswahili</option>
+    <option value="fr">Français</option>
+  </select>
+</nav>
+
+<main class="container">
+
+<section class="hero">
+  <h2 id="welcome">Welcome to PiRwandaMarketplace</h2>
+  <p id="intro">Discover products and connect with sellers across Rwanda.</p>
+  <input id="search" class="search"
+    placeholder="Search products..."
+    oninput="renderProducts()">
+  <button onclick="scrollToProducts()" id="explore">Explore Products</button>
+</section>
+
+<section class="section" id="productSection">
+  <h2 id="productHeading">Available Products</h2>
+  <div class="products" id="products"></div>
+  <p id="emptyMessage">No products available yet.</p>
+</section>
+
+<section class="section">
+  <h2 id="sellHeading">Sell Your Product</h2>
+  <p id="sellIntro">Add a product to the marketplace.</p>
+
+  <form id="productForm">
+    <label id="nameLabel">Product name</label>
+    <input id="productName" required maxlength="80">
+
+    <label id="descriptionLabel">Description</label>
+    <textarea id="productDescription" required maxlength="500"></textarea>
+
+    <label id="priceLabel">Price in Pi</label>
+    <input id="productPrice" type="number" min="0.000001"
+      step="any" required>
+
+    <label id="categoryLabel">Category</label>
+    <select id="productCategory">
+      <option value="Electronics">Electronics</option>
+      <option value="Clothing">Clothing</option>
+      <option value="Food">Food</option>
+      <option value="Home">Home</option>
+      <option value="Other">Other</option>
+    </select>
+
+    <label id="imageLabel">Product image</label>
+    <input id="productImage" type="file" accept="image/*">
+
+    <button type="submit" class="primary" id="addButton">
+      Add Product
+    </button>
+  </form>
+  <small id="storageNote">
+    Demo version: products are stored in this browser only.
+  </small>
+</section>
+
+<section class="section">
+  <h2 id="accountHeading">Account</h2>
+  <p id="accountIntro">
+    Account registration and secure login will be connected to the backend.
+  </p>
+  <button onclick="showAccountInfo()" id="accountButton">
+    Account information
+  </button>
+</section>
+
+<section class="section">
+  <h2 id="paymentHeading">Pi Network Payments</h2>
+  <p id="paymentIntro">
+    Pi payment integration will be activated after connecting the official
+    Pi SDK and backend verification.
+  </p>
+  <button onclick="showPaymentInfo()" id="paymentButton">
+    Payment information
+  </button>
+</section>
+
+</main>
+
+<footer>
+  <p>PiRwandaMarketplace © 2026</p>
+  <p>Connecting buyers and sellers in Rwanda.</p>
+</footer>
+
+<script>
+const translations = {
+en:{
+tagline:"Buy and sell products in Rwanda using Pi Network",
+welcome:"Welcome to PiRwandaMarketplace",
+intro:"Discover products and connect with sellers across Rwanda.",
+explore:"Explore Products",
+productHeading:"Available Products",
+empty:"No products available yet.",
+sellHeading:"Sell Your Product",
+sellIntro:"Add a product to the marketplace.",
+name:"Product name",description:"Description",price:"Price in Pi",
+category:"Category",image:"Product image",add:"Add Product",
+account:"Account",accountIntro:"Account registration and secure login will be connected to the backend.",
+accountButton:"Account information",
+payment:"Pi Network Payments",
+paymentIntro:"Pi payment integration will be activated after connecting the official Pi SDK and backend verification.",
+paymentButton:"Payment information",
+storage:"Demo version: products are stored in this browser only.",
+view:"View details",added:"Product added successfully.",
+accountMessage:"User accounts are not active yet. Backend integration is required.",
+paymentMessage:"Real Pi payments are not active yet. Official Pi SDK and server verification are required.",
+search:"Search products..."
+},
+rw:{
+tagline:"Gura kandi ugurishe ukoresheje Pi Network mu Rwanda",
+welcome:"Murakaza neza kuri PiRwandaMarketplace",
+intro:"Menya ibicuruzwa kandi uhuze n'abacuruzi bo mu Rwanda.",
+explore:"Reba ibicuruzwa",
+productHeading:"Ibicuruzwa bihari",
+empty:"Nta bicuruzwa birashyirwamo.",
+sellHeading:"Cururiza hano",
+sellIntro:"Shyira igicuruzwa cyawe ku isoko.",
+name:"Izina ry'igicuruzwa",description:"Ibisobanuro",price:"Igiciro muri Pi",
+category:"Icyiciro",image:"Ifoto y'igicuruzwa",add:"Ongeramo igicuruzwa",
+account:"Konti",accountIntro:"Gufungura konti no kwinjira bizakorwa nyuma yo guhuza backend.",
+accountButton:"Amakuru ya konti",
+payment:"Kwishyura muri Pi Network",
+paymentIntro:"Kwishyura muri Pi bizakora nyuma yo guhuza Pi SDK yemewe na backend.",
+paymentButton:"Amakuru yo kwishyura",
+storage:"Iyi ni demo: ibicuruzwa bibikwa muri browser yawe gusa.",
+view:"Reba ibisobanuro",added:"Igicuruzwa cyashyizwemo neza.",
+accountMessage:"Konti ntizirakora. Haracyenewe backend.",
+paymentMessage:"Kwishyura nyakuri muri Pi ntibirakora. Haracyenewe Pi SDK na server igenzura ubwishyu.",
+search:"Shakisha ibicuruzwa..."
+},
+sw:{
+tagline:"Nunua na uuze bidhaa nchini Rwanda kwa Pi Network",
+welcome:"Karibu PiRwandaMarketplace",
+intro:"Gundua bidhaa na uwasiliane na wauzaji nchini Rwanda.",
+explore:"Angalia bidhaa",
+productHeading:"Bidhaa zinazopatikana",
+empty:"Hakuna bidhaa bado.",
+sellHeading:"Uza bidhaa yako",
+sellIntro:"Ongeza bidhaa sokoni.",
+name:"Jina la bidhaa",description:"Maelezo",price:"Bei kwa Pi",
+category:"Aina",image:"Picha ya bidhaa",add:"Ongeza bidhaa",
+account:"Akaunti",accountIntro:"Usajili na kuingia kwa usalama vitaunganishwa na backend.",
+accountButton:"Maelezo ya akaunti",
+payment:"Malipo ya Pi Network",
+paymentIntro:"Malipo yatawashwa baada ya kuunganisha Pi SDK rasmi na backend.",
+paymentButton:"Maelezo ya malipo",
+storage:"Toleo la majaribio: bidhaa zinahifadhiwa kwenye kivinjari hiki pekee.",
+view:"Angalia maelezo",added:"Bidhaa imeongezwa.",
+accountMessage:"Akaunti bado hazijaanza kufanya kazi.",
+paymentMessage:"Malipo halisi ya Pi bado hayajawashwa.",
+search:"Tafuta bidhaa..."
+},
+fr:{
+tagline:"Achetez et vendez au Rwanda avec Pi Network",
+welcome:"Bienvenue sur PiRwandaMarketplace",
+intro:"Découvrez des produits et contactez les vendeurs au Rwanda.",
+explore:"Voir les produits",
+productHeading:"Produits disponibles",
+empty:"Aucun produit disponible.",
+sellHeading:"Vendez votre produit",
+sellIntro:"Ajoutez un produit au marché.",
+name:"Nom du produit",description:"Description",price:"Prix en Pi",
+category:"Catégorie",image:"Image du produit",add:"Ajouter le produit",
+account:"Compte",accountIntro:"L'inscription et la connexion sécurisée seront reliées au backend.",
+accountButton:"Informations du compte",
+payment:"Paiements Pi Network",
+paymentIntro:"Les paiements seront activés après connexion du SDK Pi officiel et du backend.",
+paymentButton:"Informations de paiement",
+storage:"Version démo : les produits sont stockés uniquement dans ce navigateur.",
+view:"Voir les détails",added:"Produit ajouté avec succès.",
+accountMessage:"Les comptes ne sont pas encore actifs.",
+paymentMessage:"Les paiements Pi réels ne sont pas encore activés.",
+search:"Rechercher des produits..."
+}
+};
+
+let currentLanguage = "en";
+let products = [];
+
+try {
+  products = JSON.parse(localStorage.getItem("pirwanda_products") || "[]");
+  if (!Array.isArray(products)) products = [];
+} catch(e) { products = []; }
+
+function changeLanguage() {
+  currentLanguage = document.getElementById("language").value;
+  const t = translations[currentLanguage];
+  const map = {
+    tagline:"tagline",welcome:"welcome",intro:"intro",
+    explore:"explore",productHeading:"productHeading",
+    sellHeading:"sellHeading",sellIntro:"sellIntro",
+    nameLabel:"name",descriptionLabel:"description",
+    priceLabel:"price",categoryLabel:"category",
+    imageLabel:"image",addButton:"add",
+    accountHeading:"account",accountIntro:"accountIntro",
+    accountButton:"accountButton",paymentHeading:"payment",
+    paymentIntro:"paymentIntro",paymentButton:"paymentButton",
+    storageNote:"storage",emptyMessage:"empty"
+  };
+  Object.keys(map).forEach(id => {
+    document.getElementById(id).textContent = t[map[id]];
+  });
+  document.getElementById("search").placeholder = t.search;
+  renderProducts();
+}
+
+function scrollToProducts() {
+  document.getElementById("productSection").scrollIntoView({
+    behavior:"smooth"
+  });
+}
+
+function saveProducts() {
+  try {
+    localStorage.setItem("pirwanda_products",JSON.stringify(products));
+    return true;
+  } catch(e) {
+    alert("Storage is full. Please use a smaller image.");
+    return false;
+  }
+}
+
+function renderProducts() {
+  const area = document.getElementById("products");
+  const query = document.getElementById("search").value.toLowerCase();
+  const t = translations[currentLanguage];
+  area.innerHTML = "";
+
+  const filtered = products.filter(p =>
+    (p.name + " " + p.description + " " + p.category)
+      .toLowerCase().includes(query)
+  );
+
+  document.getElementById("emptyMessage").style.display =
+    filtered.length ? "none" : "block";
+
+  filtered.forEach(p => {
+    const card = document.createElement("article");
+    card.className = "product";
+
+    if (p.image) {
+      const img = document.createElement("img");
+      img.src = p.image;
+      img.alt = p.name;
+      card.appendChild(img);
+    }
+
+    const info = document.createElement("div");
+    info.className = "product-info";
+
+    const title = document.createElement("h3");
+    title.textContent = p.name;
+
+    const description = document.createElement("p");
+    description.textContent = p.description;
+
+    const category = document.createElement("small");
+    category.textContent = p.category;
+
+    const price = document.createElement("p");
+    price.className = "price";
+    price.textContent = p.price + " Pi";
+
+    const button = document.createElement("button");
+    button.textContent = t.view;
+    button.onclick = () => alert(
+      p.name + "\n" + p.description + "\n" + p.price + " Pi"
+    );
+
+    info.append(title,description,category,price,button);
+    card.appendChild(info);
+    area.appendChild(card);
+  });
+}
+
+document.getElementById("productForm").addEventListener("submit",
+async function(event) {
+  event.preventDefault();
+
+  const name = document.getElementById("productName").value.trim();
+  const description = document.getElementById("productDescription").value.trim();
+  const price = Number(document.getElementById("productPrice").value);
+  const category = document.getElementById("productCategory").value;
+  const file = document.getElementById("productImage").files[0];
+
+  if (!name || !description || !Number.isFinite(price) || price <= 0) {
+    alert("Please enter valid product information.");
+    return;
+  }
+
+  if (file && !file.type.startsWith("image/")) {
+    alert("Please select a valid image.");
+    return;
+  }
+
+  if (file && file.size > 500000) {
+    alert("Please select an image smaller than 500 KB.");
+    return;
+  }
+
+  let image = "";
+
+  if (file) {
+    image = await new Promise((resolve,reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    }).catch(() => "");
+  }
+
+  products.unshift({
+    id:Date.now(),
+    name,description,price,category,image
+  });
+
+  if (saveProducts()) {
+    this.reset();
+    renderProducts();
+    alert(translations[currentLanguage].added);
+  }
+});
+
+function showAccountInfo() {
+  alert(translations[currentLanguage].accountMessage);
+}
+
+function showPaymentInfo() {
+  alert(translations[currentLanguage].paymentMessage);
+}
+
+changeLanguage();
+renderProducts();
+</script>
+
 </body>
 </html>
