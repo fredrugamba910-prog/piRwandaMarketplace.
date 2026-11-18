@@ -1,0 +1,328 @@
+
+<!DOCTYPE html>
+<html lang="rw">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#5b3c9d">
+<title>PiRwandaMarketplace</title>
+<style>
+:root{--purple:#5b3c9d;--gold:#f5b800;--bg:#f5f4f8}
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:var(--bg);color:#292735}
+header{background:var(--purple);color:white;padding:18px}
+header h1{margin:0;font-size:23px}
+header p{font-size:14px}
+main{max-width:850px;margin:auto;padding:14px}
+section{background:white;padding:16px;margin:14px 0;border-radius:12px;box-shadow:0 2px 8px #0001}
+h2{color:var(--purple);font-size:19px}
+input,select,textarea{width:100%;padding:12px;margin:7px 0 13px;border:1px solid #ccc;border-radius:7px;font-size:15px}
+button{padding:11px 15px;border:0;border-radius:7px;font-weight:bold;cursor:pointer}
+.primary{background:var(--purple);color:white}
+.gold{background:var(--gold);color:#292735}
+nav{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+nav button{background:white;color:var(--purple)}
+.product{border:1px solid #ddd;border-radius:10px;padding:12px;margin:12px 0}
+.product img{width:100%;max-height:220px;object-fit:contain}
+.price{color:var(--purple);font-size:18px;font-weight:bold}
+.notice{background:#fff5d9;padding:12px;border-radius:8px;font-size:13px}
+.small{font-size:12px;color:#666}
+.hidden{display:none}
+footer{text-align:center;padding:20px;color:#666}
+</style>
+</head>
+<body>
+
+<header>
+<h1>🟣 PiRwandaMarketplace</h1>
+<p id="tagline">Isoko rihuza abaguzi n'abacuruzi</p>
+<select id="language" onchange="changeLanguage()" style="max-width:190px">
+<option value="rw">Ikinyarwanda</option>
+<option value="en">English</option>
+<option value="sw">Kiswahili</option>
+<option value="fr">Français</option>
+</select>
+<nav>
+<button onclick="show('home')" id="navHome">Ahabanza</button>
+<button onclick="show('sell')" id="navSell">Cururiza</button>
+<button onclick="show('safety')" id="navSafety">Umutekano</button>
+</nav>
+</header>
+
+<main>
+<section id="home">
+<h2 id="marketTitle">Ibicuruzwa biri ku isoko</h2>
+<input id="search" placeholder="Shakisha igicuruzwa..." oninput="renderProducts()">
+<label id="currencyLabel">Reba ibiciro mu ifaranga:</label>
+<select id="currency" onchange="renderProducts()">
+<option value="PI">PI (π)</option>
+<option value="RWF">RWF</option>
+<option value="USD">USD ($)</option>
+<option value="USDT">USDT</option>
+</select>
+<div id="products"></div>
+</section>
+
+<section id="sell" class="hidden">
+<h2 id="sellTitle">Shyira igicuruzwa ku isoko</h2>
+<form id="productForm">
+<label id="nameLabel">Izina ry'igicuruzwa</label>
+<input id="name" required maxlength="70">
+
+<label id="descriptionLabel">Ibisobanuro</label>
+<textarea id="description" required rows="3"></textarea>
+
+<label id="priceLabel">Igiciro</label>
+<input id="price" type="number" min="0.01" step="any" required>
+
+<label id="productCurrencyLabel">Ifaranga</label>
+<select id="productCurrency">
+<option value="PI">PI</option>
+<option value="RWF">RWF</option>
+<option value="USD">USD</option>
+<option value="USDT">USDT</option>
+</select>
+
+<label id="categoryLabel">Icyiciro</label>
+<select id="category">
+<option>Electronics</option>
+<option>Clothes</option>
+<option>Vehicles</option>
+<option>Food</option>
+<option>Land and Houses</option>
+<option>Other</option>
+</select>
+
+<label id="photoLabel">Amafoto (kugeza kuri 3)</label>
+<input id="photos" type="file" accept="image/*" multiple>
+<p class="small">Hitamo amafoto atarengeje 150 KB buri imwe.</p>
+
+<label id="districtLabel">Akarere</label>
+<select id="district" required>
+<option value="">Hitamo akarere</option>
+<option>Nyarugenge</option><option>Gasabo</option>
+<option>Kicukiro</option><option>Rulindo</option>
+<option>Gicumbi</option><option>Musanze</option>
+<option>Rubavu</option><option>Nyabihu</option>
+<option>Karongi</option><option>Rutsiro</option>
+<option>Nyamasheke</option><option>Rusizi</option>
+<option>Huye</option><option>Gisagara</option>
+<option>Nyanza</option><option>Ruhango</option>
+<option>Muhanga</option><option>Kamonyi</option>
+<option>Bugesera</option><option>Rwamagana</option>
+<option>Kayonza</option><option>Ngoma</option>
+<option>Kirehe</option><option>Nyagatare</option>
+<option>Gatsibo</option><option>Burera</option>
+<option>Gakenke</option><option>Ngororero</option>
+<option>Nyamagabe</option><option>Nyaruguru</option>
+</select>
+
+<label id="sectorLabel">Umurenge</label>
+<input id="sector" required>
+
+<label id="sellerLabel">Izina cyangwa telefoni y'umucuruzi</label>
+<input id="seller" required>
+
+<button type="button" class="gold" onclick="getGPS()" id="gpsButton">Koresha GPS (ubishatse)</button>
+<p id="gpsStatus" class="small">GPS ntirakoreshwa utabyemeye.</p>
+
+<div class="notice" id="feeNotice">
+Serivisi ya app: 5% ku giciro cy'igicuruzwa. Igaragazwa mbere yo kwemeza order.
+</div>
+<br>
+<button class="primary" type="submit" id="publishButton">Shyira ku isoko</button>
+</form>
+</section>
+
+<section id="safety" class="hidden">
+<h2 id="safetyTitle">Umutekano w'ubucuruzi</h2>
+<p id="safetyText">PiRwandaMarketplace igamije gufasha abaguzi n'abacuruzi gucuruza mu mutekano.</p>
+<div class="notice">
+<strong>5% App Service Fee</strong>
+<p id="feeText">Amafaranga ya serivisi ya app ni 5% ku order yuzuye kandi yemejwe.</p>
+</div>
+<h3 id="orderTitle">Uburyo bwa P2P na Escrow</h3>
+<ul id="rules">
+<li>Buri order igomba kugira Order ID.</li>
+<li>Umuguzi n'umucuruzi bemeza ko ubucuruzi burangiye.</li>
+<li>Iyo habaye ikibazo, hagomba kubaho uburyo bwo gutanga ikirego (Dispute).</li>
+<li>Ntugatange igicuruzwa utarabona ko ubwishyu bwemejwe.</li>
+</ul>
+<p class="notice" id="demoNotice">
+Iyi ni demo gusa. Escrow nyayo, konti, ibiganiro n'ubwishyu bisaba server na serivisi z'ubwishyu zemewe. App ntirafata cyangwa ngo irekure amafaranga.
+</p>
+</section>
+
+<section>
+<h2 id="accountTitle">Konti n'ubwishyu</h2>
+<p id="accountText">Konti n'uburyo bwo kwishyura bizongerwamo mu kindi cyiciro nyuma yo gushyiraho server n'uburyo bwizewe bwo kwishyura.</p>
+</section>
+</main>
+
+<footer>PiRwandaMarketplace © 2026</footer>
+
+<script>
+const words={
+rw:{
+tag:"Isoko rihuza abaguzi n'abacuruzi",home:"Ahabanza",sell:"Cururiza",safety:"Umutekano",
+market:"Ibicuruzwa biri ku isoko",search:"Shakisha igicuruzwa...",
+currency:"Reba ibiciro mu ifaranga:",sellTitle:"Shyira igicuruzwa ku isoko",
+name:"Izina ry'igicuruzwa",description:"Ibisobanuro",price:"Igiciro",
+productCurrency:"Ifaranga",category:"Icyiciro",photo:"Amafoto (kugeza kuri 3)",
+district:"Akarere",sector:"Umurenge",seller:"Izina cyangwa telefoni y'umucuruzi",
+gps:"Koresha GPS (ubishatse)",publish:"Shyira ku isoko",
+fee:"Serivisi ya app ni 5% ku giciro. Igaragazwa mbere yo kwemeza order.",
+safetyTitle:"Umutekano w'ubucuruzi",safetyText:"Dufasha abaguzi n'abacuruzi gucuruza mu mutekano.",
+feeText:"Amafaranga ya serivisi ni 5% ku order yuzuye kandi yemejwe.",
+orderTitle:"Uburyo bwa P2P na Escrow",
+rules:["Buri order igomba kugira Order ID.","Umuguzi n'umucuruzi bemeza ko ubucuruzi burangiye.","Iyo habaye ikibazo, hashobora gutangwa ikirego (Dispute).","Ntugatange igicuruzwa utarabona ko ubwishyu bwemejwe."],
+demo:"Iyi ni demo gusa. Escrow nyayo, konti, ibiganiro n'ubwishyu bisaba server n'abatanga serivisi z'ubwishyu bemewe. App ntirafata cyangwa ngo irekure amafaranga.",
+account:"Konti n'ubwishyu",accountText:"Konti n'uburyo bwo kwishyura bizongerwamo mu kindi cyiciro.",
+buy:"Tangira order",none:"Nta bicuruzwa birashyirwaho kugeza ubu.",location:"Aho giherereye",
+sellerInfo:"Umucuruzi",feeLabel:"Amafaranga ya serivisi",total:"Igiteranyo",orderDemo:"Iyi ni demo. Nta order cyangwa ubwishyu nyabyo byakozwe."
+},
+en:{
+tag:"A marketplace connecting buyers and sellers",home:"Home",sell:"Sell",safety:"Safety",
+market:"Available products",search:"Search products...",currency:"Display prices in:",
+sellTitle:"List a product",name:"Product name",description:"Description",price:"Price",
+productCurrency:"Currency",category:"Category",photo:"Photos (up to 3)",district:"District",
+sector:"Sector",seller:"Seller name or phone",gps:"Use GPS (optional)",publish:"Publish product",
+fee:"App service fee is 5% of the price. Shown before order confirmation.",
+safetyTitle:"Marketplace safety",safetyText:"We aim to help buyers and sellers trade safely.",
+feeText:"The service fee is 5% on completed and confirmed orders.",
+orderTitle:"P2P and Escrow process",
+rules:["Every order should have an Order ID.","Buyer and seller confirm completion.","A dispute process should be available.","Do not release goods before payment is verified."],
+demo:"Demo only. Real escrow, accounts, chat and payments require a backend and approved payment providers. This app does not hold or release money.",
+account:"Account and payments",accountText:"Accounts and payments will be added in a later stage.",
+buy:"Start order",none:"No products listed yet.",location:"Location",sellerInfo:"Seller",
+feeLabel:"Service fee",total:"Total",orderDemo:"Demo only. No real order or payment was created."
+},
+sw:{
+tag:"Soko linalounganisha wanunuzi na wauzaji",home:"Nyumbani",sell:"Uza",safety:"Usalama",
+market:"Bidhaa zilizopo",search:"Tafuta bidhaa...",currency:"Onyesha bei kwa:",
+sellTitle:"Weka bidhaa sokoni",name:"Jina la bidhaa",description:"Maelezo",price:"Bei",
+productCurrency:"Sarafu",category:"Aina ya bidhaa",photo:"Picha (hadi 3)",district:"Wilaya",
+sector:"Sekta",seller:"Jina au simu ya muuzaji",gps:"Tumia GPS (hiari)",publish:"Weka sokoni",
+fee:"Ada ya huduma ya app ni 5% ya bei. Itaonyeshwa kabla ya kuthibitisha oda.",
+safetyTitle:"Usalama wa biashara",safetyText:"Tunasaidia wanunuzi na wauzaji kufanya biashara salama.",
+feeText:"Ada ya huduma ni 5% kwa oda iliyokamilika na kuthibitishwa.",
+orderTitle:"Mfumo wa P2P na Escrow",
+rules:["Kila oda iwe na Order ID.","Mnunuzi na muuzaji wathibitishe kukamilika kwa biashara.","Malalamiko yaweze kuwasilishwa tatizo linapotokea.","Usitoe bidhaa kabla ya kuthibitisha malipo."],
+demo:"Huu ni mfano tu. Escrow halisi, akaunti, mazungumzo na malipo yanahitaji seva na watoa huduma walioidhinishwa. App hii haishikilii wala kutoa fedha.",
+account:"Akaunti na malipo",accountText:"Akaunti na malipo vitaongezwa katika hatua inayofuata.",
+buy:"Anza oda",none:"Hakuna bidhaa zilizowekwa bado.",location:"Mahali",sellerInfo:"Muuzaji",
+feeLabel:"Ada ya huduma",total:"Jumla",orderDemo:"Mfano tu. Hakuna oda au malipo halisi yaliyofanywa."
+},
+fr:{
+tag:"Une place de marché reliant acheteurs et vendeurs",home:"Accueil",sell:"Vendre",safety:"Sécurité",
+market:"Produits disponibles",search:"Rechercher un produit...",currency:"Afficher les prix en :",
+sellTitle:"Publier un produit",name:"Nom du produit",description:"Description",price:"Prix",
+productCurrency:"Devise",category:"Catégorie",photo:"Photos (jusqu'à 3)",district:"District",
+sector:"Secteur",seller:"Nom ou téléphone du vendeur",gps:"Utiliser le GPS (facultatif)",publish:"Publier",
+fee:"Les frais de service sont de 5 % du prix. Affichés avant la confirmation.",
+safetyTitle:"Sécurité du marché",safetyText:"Nous visons à faciliter des échanges sûrs entre acheteurs et vendeurs.",
+feeText:"Les frais de service sont de 5 % sur les commandes terminées et confirmées.",
+orderTitle:"Processus P2P et Escrow",
+rules:["Chaque commande doit avoir un Order ID.","L'acheteur et le vendeur confirment la fin de la transaction.","Une procédure de litige doit être disponible.","Ne remettez pas le produit avant la vérification du paiement."],
+demo:"Démo uniquement. Un véritable escrow, les comptes, le chat et les paiements nécessitent un serveur et des prestataires agréés. Cette application ne détient ni ne libère d'argent.",
+account:"Compte et paiements",accountText:"Les comptes et paiements seront ajoutés ultérieurement.",
+buy:"Démarrer une commande",none:"Aucun produit publié.",location:"Emplacement",sellerInfo:"Vendeur",
+feeLabel:"Frais de service",total:"Total",orderDemo:"Démo uniquement. Aucune commande ni aucun paiement réel."
+}
+};
+
+function changeLanguage(){
+const t=words[document.getElementById("language").value];
+const ids={
+tagline:"tag",navHome:"home",navSell:"sell",navSafety:"safety",
+marketTitle:"market",currencyLabel:"currency",sellTitle:"sellTitle",
+nameLabel:"name",descriptionLabel:"description",priceLabel:"price",
+productCurrencyLabel:"productCurrency",categoryLabel:"category",
+photoLabel:"photo",districtLabel:"district",sectorLabel:"sector",
+sellerLabel:"seller",gpsButton:"gps",publishButton:"publish",
+feeNotice:"fee",safetyTitle:"safetyTitle",safetyText:"safetyText",
+feeText:"feeText",orderTitle:"orderTitle",demoNotice:"demo",
+accountTitle:"account",accountText:"accountText"
+};
+for(const id in ids)document.getElementById(id).textContent=t[ids[id]];
+document.getElementById("search").placeholder=t.search;
+document.getElementById("rules").innerHTML=t.rules.map(x=>"<li>"+x+"</li>").join("");
+renderProducts();
+}
+function show(id){
+["home","sell","safety"].forEach(x=>document.getElementById(x).classList.add("hidden"));
+document.getElementById(id).classList.remove("hidden");
+}
+let products=JSON.parse(localStorage.getItem("prm_products")||"[]");
+let gpsLocation="";
+function save(){localStorage.setItem("prm_products",JSON.stringify(products))}
+function money(n,c){return Number(n).toLocaleString()+" "+c}
+function renderProducts(){
+const t=words[document.getElementById("language").value];
+const q=document.getElementById("search").value.toLowerCase();
+const currency=document.getElementById("currency").value;
+const area=document.getElementById("products");
+const list=products.filter(p=>(p.name+" "+p.description+" "+p.category).toLowerCase().includes(q));
+if(!list.length){area.textContent=t.none;return}
+area.innerHTML="";
+list.forEach(p=>{
+const div=document.createElement("div");div.className="product";
+const title=document.createElement("h3");title.textContent=p.name;div.appendChild(title);
+(p.photos||[]).forEach(src=>{const img=document.createElement("img");img.src=src;div.appendChild(img)});
+const desc=document.createElement("p");desc.textContent=p.description;div.appendChild(desc);
+const price=document.createElement("p");price.className="price";price.textContent=money(p.price,p.currency);div.appendChild(price);
+const loc=document.createElement("p");loc.textContent=t.location+": "+p.district+", "+p.sector;div.appendChild(loc);
+const seller=document.createElement("p");seller.textContent=t.sellerInfo+": "+p.seller;div.appendChild(seller);
+const btn=document.createElement("button");btn.className="primary";btn.textContent=t.buy;
+btn.onclick=()=>startOrder(p);div.appendChild(btn);
+area.appendChild(div);
+});
+}
+async function readPhotos(files){
+if(files.length>3)throw Error("Hitamo amafoto atarenze 3.");
+const result=[];
+for(const file of files){
+if(!file.type.startsWith("image/"))throw Error("Hitamo amafoto gusa.");
+if(file.size>150*1024)throw Error("Buri foto ntigomba kurenza 150 KB.");
+result.push(await new Promise((resolve,reject)=>{
+const reader=new FileReader();reader.onload=()=>resolve(reader.result);reader.onerror=reject;reader.readAsDataURL(file);
+}));
+}
+return result;
+}
+document.getElementById("productForm").addEventListener("submit",async e=>{
+e.preventDefault();
+try{
+const photos=await readPhotos([...document.getElementById("photos").files]);
+const p={
+id:Date.now(),name:document.getElementById("name").value,
+description:document.getElementById("description").value,
+price:Number(document.getElementById("price").value),
+currency:document.getElementById("productCurrency").value,
+category:document.getElementById("category").value,
+photos,district:document.getElementById("district").value,
+sector:document.getElementById("sector").value,
+seller:document.getElementById("seller").value
+};
+products.unshift(p);save();e.target.reset();gpsLocation="";
+document.getElementById("gpsStatus").textContent="";show("home");renderProducts();
+alert("Igicuruzwa cyashyizwe ku isoko muri iyi browser.");
+}catch(err){alert(err.message||"Habaye ikibazo.")}
+});
+function startOrder(p){
+const fee=p.price*0.05,total=p.price+fee;
+const t=words[document.getElementById("language").value];
+alert(p.name+"\n"+t.price+": "+money(p.price,p.currency)+"\n"+t.feeLabel+": "+money(fee,p.currency)+"\n"+t.total+": "+money(total,p.currency)+"\n\n"+t.orderDemo);
+}
+function getGPS(){
+if(!navigator.geolocation){alert("GPS ntiboneka kuri iki gikoresho.");return}
+navigator.geolocation.getCurrentPosition(pos=>{
+gpsLocation=pos.coords.latitude+","+pos.coords.longitude;
+document.getElementById("gpsStatus").textContent="GPS yabonetse. Nta makuru yoherejwe kuri server.";
+},()=>alert("Ntabwo wemeye GPS cyangwa ntiyabonetse."));
+}
+changeLanguage();
+renderProducts();
+</script>
+</body>
+</html>
